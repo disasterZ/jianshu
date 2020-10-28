@@ -1,33 +1,48 @@
-import React from 'react';
+import React,{Component} from 'react';
 import { connect } from "react-redux";
 import { SearchInfoItem, SearchInfoSwitch, SearchInfoTitle, SearchInfo, Addition, HeaderWrapper, Logo, Nav, NavItem, NavSearch, Button, SearchWrapper, SearchInfoList } from './style';
 import { CSSTransition } from 'react-transition-group';
 import { actionCreator } from "./store";
 
-const getListArea = (show) => {
-    if (show) {
-        return (
-            <SearchInfo>
-                <SearchInfoTitle>
-                    热门搜索
-                <SearchInfoSwitch>换一批</SearchInfoSwitch>
-                </SearchInfoTitle>
-                <SearchInfoList>
-                    <SearchInfoItem>教育</SearchInfoItem>
-                    <SearchInfoItem>教育</SearchInfoItem>
-                    <SearchInfoItem>教育</SearchInfoItem>
-                    <SearchInfoItem>教育</SearchInfoItem>
-                    <SearchInfoItem>教育</SearchInfoItem>
-                </SearchInfoList>
-            </SearchInfo>)
-    } else {
-        return null;
-    }
-}
 
-const Header = (props) => {
-    return (
-        <HeaderWrapper>
+class Header extends Component{
+    getListArea(){
+        const {mouseIn,focused,list,totalPage,page,handleMouseEnter,handleMouseLeave,handleChangePage} = this.props;
+        const jsList = list.toJS();
+        const pageList=[];
+        if(jsList.length){
+            for(let i=(page-1)*5;i<page*5;i++){
+                pageList.push(
+                <SearchInfoItem key={jsList[i]}>{jsList[i]}</SearchInfoItem>
+                )
+            }
+        }
+        if (focused || mouseIn) {
+            return (
+                <SearchInfo 
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <SearchInfoTitle>
+                        热门搜索
+                    <SearchInfoSwitch
+                        onClick={()=>handleChangePage(page,totalPage,this.spinIcon)}
+                    >
+                        <i ref={(icon)=>{this.spinIcon = icon}} className='iconfont spin'>&#xe606;</i>
+                        换一批</SearchInfoSwitch>
+                    </SearchInfoTitle>
+                    <SearchInfoList>
+                        {pageList}
+                    </SearchInfoList>
+                </SearchInfo>)
+        } else {
+            return null;
+        }
+    }
+    render(){
+        const {focused,handleInputBlur,handleInputFocused,list} = this.props;
+        return(
+            <HeaderWrapper>
             <Logo href='/' />
             <Nav>
                 <NavItem className='left active'>首页</NavItem>
@@ -39,17 +54,17 @@ const Header = (props) => {
                 <SearchWrapper>
                     <CSSTransition
                         timeout={200}
-                        in={props.focused}
+                        in={focused}
                         classNames="slide"
                     >
                         <NavSearch
-                            className={props.focused ? 'focused' : ''}
-                            onFocus={props.handleInputFocused}
-                            onBlur={props.handleInputBlur}
+                            className={focused ? 'focused' : ''}
+                            onFocus={()=>{handleInputFocused(list)}}
+                            onBlur={handleInputBlur}
                         ></NavSearch>
                     </CSSTransition>
-                    <i className={props.focused ? 'focused iconfont' : 'iconfont'}>&#xe77d;</i>
-                    {getListArea(props.focused)}
+                    <i className={focused ? 'focused iconfont zoom' : 'iconfont zoom'}>&#xe77d;</i>
+                    {this.getListArea()}
                 </SearchWrapper>
             </Nav>
             <Addition>
@@ -60,23 +75,53 @@ const Header = (props) => {
                 <Button className='reg'>注册</Button>
             </Addition>
         </HeaderWrapper>
-    )
+        )
+    }
 }
+
 
 
 const mapStateToProps = (state) => {
     return {
-        focused: state.getIn(['header', 'focused'])
+        focused: state.getIn(['header', 'focused']),
+        list:state.getIn(['header','list']),
+        page:state.getIn(['header','page']),
+        totalPage:state.getIn(['header','totalPage']),
+        mouseIn:state.getIn(['header','mouseIn'])
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleInputFocused() {
+        handleInputFocused(list) {
+            if(list.size === 0){
+                dispatch(actionCreator.getList());
+            }
             dispatch(actionCreator.searchFocus());
         },
         handleInputBlur() {
             dispatch(actionCreator.searchBlur())
+        },
+        handleMouseEnter(){
+            dispatch(actionCreator.mouseEnter())
+        },
+        handleMouseLeave(){
+            dispatch(actionCreator.mouseLeave())
+        },
+        handleChangePage(page,totalPage,spin){
+            let originAngle=spin.style.transform.replace(/[^0-9]/ig,'');
+            if (originAngle){
+                originAngle=parseInt(originAngle,10);
+            }else{
+                originAngle=0;
+            }
+            spin.style.transform='rotate('+originAngle+360+'deg)';
+            if(page<totalPage){
+                dispatch(actionCreator.changePage(page+1))
+            }
+            else{
+                dispatch(actionCreator.changePage(1))
+            }
         }
     }
 }
