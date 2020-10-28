@@ -1,15 +1,26 @@
-import React,{Component} from "react";
+import React, { Component } from "react";
 import Header from './common/header';
 import { Provider } from "react-redux";
-import {Iconfont} from './statics/iconfont/iconfont';
+import { BrowserRouter, Route } from "react-router-dom";
+import { Iconfont } from './statics/iconfont/iconfont';
 import store from './store';
+import Home from './pages/home'
+import Detail from './pages/detail'
 
-class App extends Component{
-    render(){
-        return(
+class App extends Component {
+    render() {
+        return (
             <Provider store={store}>
-                <Iconfont />
-                <Header />
+                <div>
+                    <Iconfont />
+                    <Header />
+                    <BrowserRouter>
+                        <Route path='/' exact component={Home}
+                        ></Route>
+                        <Route path='/detail' exact component={Detail}
+                        ></Route>
+                    </BrowserRouter>
+                </div>
             </Provider>
         )
     }

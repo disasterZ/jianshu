@@ -3,7 +3,7 @@ import logoPic from '../../statics/logo.png';
 
 export const HeaderWrapper = styled.div`
     height:56px;
-    border-botttom:1px soild #f0f0f0;
+    border-bottom:1px soild #f0f0f0;
     position:relative;
 `;
 
@@ -129,6 +129,7 @@ export const SearchInfo= styled.div`
     width:240px;
     padding:0 20px;
     box-shadow: 0 0 8px rgba(0,0,0,.2);
+    background:white;
 `
 
 export const SearchInfoTitle=styled.div`
